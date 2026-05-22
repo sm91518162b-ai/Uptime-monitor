@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Ghost‑Watch con notificaciones de Termux
-- Chequea la URL cada 15 min.
-- Muestra tabla coloreada (Rich).
-- Guarda log JSON.
-- Envía notificación CLI cuando cambia el estado (up ↔ down).
+Uptime Monitor - Monitoreo de disponibilidad de URLs con notificaciones de Termux
+- Chequea la URL en intervalos configurables
+- Muestra tabla de estado con Rich
 """
 
 import json
@@ -25,7 +23,7 @@ from rich.table import Table
 URL          = "https://ejemplo.com"   # ← pon tu URL aquí
 INTERVAL_MIN = 15                      # minutos entre checks
 TIMEOUT       = 10                     # s, tiempo máximo de espera
-LOG_FILE      = Path("ghost_watch_log.json")
+LOG_FILE    = Path("uptime_monitor_log.json")
 console       = Console()
 # -----------------------------------------------------------
 
@@ -93,12 +91,11 @@ def monitor_job() -> None:
         if res["up"]:                                 # ↓ → ↑ (recuperación)
             log_event("recovery", {"url": URL,
                                    "downtime_s": int(downtime)})
-            termux_notify("✅ Ghost‑Watch", f"✅ {URL} está de nuevo ONLINE",
-                          priority=1)
+            termux_notify('✅ Uptime-Monitor', f'✅ {URL} está de nuevo ONLINE', priority=1)
         else:                                         # ↑ → ↓ (caída)
             log_event("down", {"url": URL,
                                "uptime_s": int(downtime)})
-            termux_notify("⚠️ Ghost‑Watch", f"❌ {URL} ha caído",
+            termux_notify('⚠️ Uptime-Monitor', f'❌ {URL} ha caído', priority=2)
                           priority=2)
         last_state = {"up": res["up"], "since": now}
     else:
@@ -107,7 +104,7 @@ def monitor_job() -> None:
                                 "response_ms": res["response_ms"]})
 
     # -------------------- UI en consola ------------------------
-    tbl = Table(title="🕸️ Ghost‑Watch", box=box.SIMPLE_HEAVY)
+    tbl = Table(title=" Uptime-Monitor",  box=box.SIMPLE_HEAVY)
     tbl.add_column("UTC", style="dim")
     tbl.add_column("URL")
     tbl.add_column("Estado", justify="center")
@@ -128,7 +125,7 @@ def monitor_job() -> None:
 
 # ------------------------- MAIN -----------------------------
 def main() -> None:
-    console.print("[bold]Ghost‑Watch con notificaciones iniciada[/bold] – URL:", URL)
+    console.print("[bold]Uptime-Monitor iniciado[/bold] - URL:", URL) notificaciones iniciada[/bold] – URL:", URL)
     schedule.every(INTERVAL_MIN).minutes.do(monitor_job)
     monitor_job()                # ejecución inmediata al lanzar
     while True:
